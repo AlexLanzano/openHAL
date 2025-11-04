@@ -1,7 +1,7 @@
 #ifndef OHAL_DEVICE_H
 #define OHAL_DEVICE_H
 
-#include <ohal/register.h>
+#include <openHAL/register.h>
 
 #define OHAL_MAX_DEV_NAME_LEN 256
 

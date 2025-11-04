@@ -1,5 +1,6 @@
-#include <openHAL/clock.h>
+#include <openHAL/clock/clock.h>
 #include <openHAL/error.h>
+#include <openHAL/print.h>
 
 inline ohal_Error ohal_Clock_Init(ohal_Clock *clkDev)
 {
@@ -59,5 +60,5 @@ inline ohal_Error ohal_Clock_Cmd(ohal_Clock *clkDev, size_t cmd, void *args)
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->cmd(clkDev, cmd, args);
+    return clkDev->ops->Cmd(clkDev, cmd, args);
 }

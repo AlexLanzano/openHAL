@@ -16,7 +16,6 @@ typedef enum {
 
 typedef struct ohal_StClock_Cfg {
     ohal_StClock_ClockSrc sysClk;
-ohal_StClock_ClockSrc 
     
 } ohal_StClock_Cfg;
 
