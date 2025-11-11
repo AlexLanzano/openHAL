@@ -1,4 +1,4 @@
-OHAL_DIR = ../../
+OHAL_DIR = $(PWD)/../../
 INCLUDE = -I$(OHAL_DIR)
 CFLAGS = -Wall -Werror $(INCLUDE) -g3 \
 		 -ffreestanding -nostdlib -mcpu=cortex-m4 \
