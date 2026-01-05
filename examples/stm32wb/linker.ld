@@ -1,7 +1,7 @@
 /**
 *****************************************************************************
 **
-**  File        : stm32wb55xx_flash_cm4.ld
+**  File        : linker.ld
 **
 **  Abstract    : System Workbench Minimal System calls file
 **
@@ -123,12 +123,6 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
-
-  .bootloader_magic :
-  {
-    . = ALIGN(4);
-    _bootloader_magic = .;
-  } >BOOTLOADER_MAGIC
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);

@@ -12,7 +12,7 @@ typedef struct {
     ohal_Error (*Deinit)(ohal_Clock *clkDev);
     ohal_Error (*Enable)(ohal_Clock *clkDev);
     ohal_Error (*Disable)(ohal_Clock *clkDev);
-    ohal_Error (*GetRate)(ohal_Clock *clkDev, size_t *rateOut);
+    ohal_Error (*GetRate)(ohal_Clock *clkDev, size_t *rate);
     ohal_Error (*Cmd)(ohal_Clock *clkDev, size_t cmd, void *args);
 } ohal_ClockOps;
 
@@ -62,12 +62,12 @@ ohal_Error ohal_Clock_Disable(ohal_Clock *clkDev);
  * @brief Reports the current output rate for a clock device.
  *
  * @param clkDev  Pointer to the clock instance being queried.
- * @param rateOut Storage for the computed frequency in Hz.
+ * @param rate Storage for the computed frequency in Hz.
  *
  * @retval OHAL_SUCCESS Result stored in rateOut.
  * @retval OHAL_EINVAL  Null pointer or driver could not provide a rate.
  */
-ohal_Error ohal_Clock_GetRate(ohal_Clock *clkDev, size_t *rateOut);
+ohal_Error ohal_Clock_GetRate(ohal_Clock *clkDev, size_t *rate);
 /**
  * @brief Issues a driver-specific command to a clock device.
  *
