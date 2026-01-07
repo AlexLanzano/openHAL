@@ -2,33 +2,36 @@
 #include <openHAL/clock/st_clock.h>
 #include <openHAL/gpio/st_gpio.h>
 #include <openHAL/timer/systick.h>
+#include <openHAL/uart/st_uart.h>
 #include <openHAL/bitops.h>
 
 extern ohal_ClockOps g_stClockOps;
 extern ohal_GpioOps g_stGpioOps;
 extern ohal_TimerOps g_sysTickOps;
+extern ohal_UartOps g_stUartOps;
 
 ohal_StClock_PeriphClk periphClkEn[] =
 {
+    OHAL_ST_CLOCK_PERIPH_GPIOA,
     OHAL_ST_CLOCK_PERIPH_GPIOB,
     OHAL_ST_CLOCK_PERIPH_LPUART1,
 };
 
 ohal_StClock_Cfg clkCfg =
 {
-    .sysClkSrc = OHAL_ST_CLOCK_SRC_PLL,
+    .sysClkSrc = OHAL_ST_CLOCK_SYSCLK_SRC_PLL,
     .sysClkCfg.pll =
     {
-        .clkSrc = OHAL_ST_CLOCK_SRC_MSI,
+        .clkSrc = OHAL_ST_CLOCK_PLLCLK_SRC_MSI,
         /* 64 MHz */
         .n = 32,
         .m = 0,
         .r = 1,
-        .q = 1,
-        .p = 1,
+        .q = 0,
+        .p = 0,
     },
     .periphClkEn = periphClkEn,
-    .periphClkEnCount = 2,
+    .periphClkEnCount = sizeof(periphClkEn),
 };
 
 ohal_Clock clk = {
@@ -44,7 +47,7 @@ ohal_Clock clk = {
 };
 
 ohal_StGpio_Cfg gpioCfg[] = {
-    {
+    { /* LED */
         .port = OHAL_STGPIO_PORT_B,
         .pin = 5,
         .mode = OHAL_STGPIO_MODE_OUT,
@@ -52,6 +55,24 @@ ohal_StGpio_Cfg gpioCfg[] = {
         .speed = OHAL_STGPIO_SPEED_LOW,
         .pull = OHAL_STGPIO_PULL_UP,
         .altFn = 0,
+    },
+    { /* LPUART1 TX */
+        .port = OHAL_STGPIO_PORT_A,
+        .pin = 2,
+        .mode = OHAL_STGPIO_MODE_ALTFN,
+        .outType = OHAL_STGPIO_OUTTYPE_PUSHPULL,
+        .speed = OHAL_STGPIO_SPEED_FAST,
+        .pull = OHAL_STGPIO_PULL_UP,
+        .altFn = 8,
+    },
+    { /* LPUART1 RX */
+        .port = OHAL_STGPIO_PORT_A,
+        .pin = 3,
+        .mode = OHAL_STGPIO_MODE_ALTFN,
+        .outType = OHAL_STGPIO_OUTTYPE_PUSHPULL,
+        .speed = OHAL_STGPIO_SPEED_FAST,
+        .pull = OHAL_STGPIO_PULL_UP,
+        .altFn = 8,
     },
 };
 
@@ -69,7 +90,7 @@ ohal_Gpio gpio = {
 };
 
 ohal_SysTick_Cfg sysTickCfg = {
-    .cyclesPerTick = 4000000 / 1000,
+    .cyclesPerTick = 64000000 / 1000,
     .clkSrc = OHAL_SYSTICK_CLKSRC_SYSCLK,
     .tickInt = OHAL_SYSTICK_TICKINT_ENABLED,
 };
@@ -84,6 +105,23 @@ ohal_Timer sysTickTimer = {
     },
     .ops = &g_sysTickOps,
     .cfg = &sysTickCfg,
+};
+
+ohal_StUart_Cfg lpuart1Cfg = {
+    .baud = 115200,
+    .sysClk = &clk,
+};
+
+ohal_Uart lpuart1 = {
+    .dev = {
+        .name = "LPUART1",
+        .reg = {
+            .base = 0x40008000,
+            .size = 0x400,
+        },
+    },
+    .ops = &g_stUartOps,
+    .cfg = &lpuart1Cfg,
 };
 
 volatile size_t g_tick = 0;
@@ -152,6 +190,12 @@ void main(void)
         goto loop;
     }
 
+    err = ohal_Uart_Init(&lpuart1);
+    if (err) {
+        ohal_PrintErr(err, "Failed to ohal_Uart_Init");
+        goto loop;
+    }
+
     err = ohal_Timer_Init(&sysTickTimer);
     if (err) {
         ohal_PrintErr(err, "Failed to ohal_Timer_Init");
@@ -165,6 +209,14 @@ void main(void)
     }
 
     while (1) {
+        ohal_Timer_Stop(&sysTickTimer);
+        err = ohal_Uart_Send(&lpuart1, (u8 *)"A", 1);
+        if (err) {
+            ohal_PrintErr(err, "Failed to ohal_Uart_Send");
+            goto loop;
+        }
+        ohal_Timer_Start(&sysTickTimer);
+
         err = ohal_Gpio_Set(&gpio, 0, 1);
         if (err) {
             ohal_PrintErr(err, "Failed to ohal_Gpio_Set");
@@ -181,7 +233,6 @@ void main(void)
 
         WaitMs(1000);
     }
-
 
 loop:
     while (1);

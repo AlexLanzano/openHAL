@@ -5,15 +5,18 @@
 #include <stddef.h>
 
 typedef enum {
-    OHAL_ST_CLOCK_SRC_NONE,
-    OHAL_ST_CLOCK_SRC_HSI16,
-    OHAL_ST_CLOCK_SRC_MSI,
-    OHAL_ST_CLOCK_SRC_HSE,
-    OHAL_ST_CLOCK_SRC_PLL,
-    OHAL_ST_CLOCK_SRC_LSE,
-    OHAL_ST_CLOCK_SRC_LSI,
+    OHAL_ST_CLOCK_SYSCLK_SRC_MSI,
+    OHAL_ST_CLOCK_SYSCLK_SRC_HSI16,
+    OHAL_ST_CLOCK_SYSCLK_SRC_HSE,
+    OHAL_ST_CLOCK_SYSCLK_SRC_PLL,
+} ohal_StClock_SysClockSrc;
 
-} ohal_StClock_ClockSrc;
+typedef enum {
+    OHAL_ST_CLOCK_PLLCLK_SRC_NONE,
+    OHAL_ST_CLOCK_PLLCLK_SRC_MSI,
+    OHAL_ST_CLOCK_PLLCLK_SRC_HSI16,
+    OHAL_ST_CLOCK_PLLCLK_SRC_HSE,
+} ohal_StClock_PllClockSrc;
 
 typedef enum ohal_StClock_PeriphClk {
     OHAL_ST_CLOCK_PERIPH_GPIOA,
@@ -22,7 +25,7 @@ typedef enum ohal_StClock_PeriphClk {
 } ohal_StClock_PeriphClk;
 
 typedef struct ohal_StClock_PllClkCfg {
-    ohal_StClock_ClockSrc clkSrc;
+    ohal_StClock_PllClockSrc clkSrc;
     u8 r;
     u8 q;
     u8 p;
@@ -35,7 +38,7 @@ typedef struct ohal_StClock_MsiClkCfg {
 } ohal_StClock_MsiClkCfg;
 
 typedef struct ohal_StClock_Cfg {
-    ohal_StClock_ClockSrc sysClkSrc;
+    ohal_StClock_SysClockSrc sysClkSrc;
 
     union {
         ohal_StClock_PllClkCfg pll;

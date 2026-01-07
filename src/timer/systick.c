@@ -67,8 +67,8 @@ static ohal_Error SysTick_Stop(ohal_Timer *timerDev)
         return OHAL_EINVAL;
     }
 
-    err = ohal_Reg_Set(reg, SYSTICK_CSR_REG, 
-                       ohal_SetBits(SYSTICK_CSR_ENABLE, 0));
+    err = ohal_Reg_Update(reg, SYSTICK_CSR_REG, SYSTICK_CSR_ENABLE,
+                          ohal_SetBits(SYSTICK_CSR_ENABLE, 0));
 
     return err;
 }

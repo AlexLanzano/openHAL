@@ -26,6 +26,7 @@
 #define STCLOCK_PLLCFGR_PLLN_MASK   OHAL_MASK_RANGE(14, 8)
 #define STCLOCK_PLLCFGR_PLLP_MASK   OHAL_MASK_RANGE(21, 17)
 #define STCLOCK_PLLCFGR_PLLQ_MASK   OHAL_MASK_RANGE(27, 25)
+#define STCLOCK_PLLCFGR_PLLREN_MASK OHAL_MASK(28)
 #define STCLOCK_PLLCFGR_PLLR_MASK   OHAL_MASK_RANGE(31, 29)
 
 #define STCLOCK_AHB2ENR_REG 0x04C
@@ -38,9 +39,9 @@
 #define STCLOCK_AHB2ENR_ADCEN   OHAL_MASK(13)
 #define STCLOCK_AHB2ENR_AES1EN  OHAL_MASK(16)
 
-#define STCLOCK_APB1ENR_REG 0x05C
-#define STCLOCK_APB1ENR_LPUART1EN OHAL_MASK(0)
-#define STCLOCK_APB1ENR_LPTIM2EN    OHAL_MASK(5)
+#define STCLOCK_APB1ENR2_REG 0x05C
+#define STCLOCK_APB1ENR2_LPUART1EN OHAL_MASK(0)
+#define STCLOCK_APB1ENR2_LPTIM2EN  OHAL_MASK(5)
 
 static ohal_Error StClock_InitPllClk(ohal_Clock *clkDev,
                                      ohal_StClock_Cfg *cfg,
@@ -48,14 +49,33 @@ static ohal_Error StClock_InitPllClk(ohal_Clock *clkDev,
 {
     ohal_Error err;
     ohal_Reg *reg = &clkDev->dev.reg;
+    size_t pllCfgMask = 
+        STCLOCK_PLLCFGR_PLLSRC_MASK |
+        STCLOCK_PLLCFGR_PLLM_MASK |
+        STCLOCK_PLLCFGR_PLLN_MASK |
+        STCLOCK_PLLCFGR_PLLP_MASK |
+        STCLOCK_PLLCFGR_PLLQ_MASK |
+        STCLOCK_PLLCFGR_PLLREN_MASK |
+        STCLOCK_PLLCFGR_PLLR_MASK;
 
-    err = ohal_Reg_Set(reg, STCLOCK_PLLCFGR_REG,
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLSRC_MASK, pllCfg->clkSrc) |
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLM_MASK, pllCfg->m) |
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLN_MASK, pllCfg->n) |
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLP_MASK, pllCfg->p) |
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLQ_MASK, pllCfg->q) |
-                       ohal_SetBits(STCLOCK_PLLCFGR_PLLR_MASK, pllCfg->r));
+    if (cfg->sysClkSrc != OHAL_ST_CLOCK_SYSCLK_SRC_PLL) {
+        return OHAL_EINVAL;
+    }
+
+    err = ohal_Reg_Update(reg, STCLOCK_CFGR_REG, STCLOCK_CFGR_SW,
+                          ohal_SetBits(STCLOCK_CFGR_SW, cfg->sysClkSrc));
+    if (err) {
+        return err;
+    }
+
+    err = ohal_Reg_Update(reg, STCLOCK_PLLCFGR_REG, pllCfgMask,
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLSRC_MASK, pllCfg->clkSrc) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLM_MASK, pllCfg->m) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLN_MASK, pllCfg->n) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLP_MASK, pllCfg->p) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLQ_MASK, pllCfg->q) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLREN_MASK, 1) |
+                          ohal_SetBits(STCLOCK_PLLCFGR_PLLR_MASK, pllCfg->r));
     if (err) {
         return err;
     }
@@ -75,7 +95,7 @@ static ohal_Error StClock_Init(ohal_Clock *clkDev)
     cfg = (ohal_StClock_Cfg *)clkDev->cfg;
 
     switch (cfg->sysClkSrc) {
-    case OHAL_ST_CLOCK_SRC_PLL: {
+    case OHAL_ST_CLOCK_SYSCLK_SRC_PLL: {
         err = StClock_InitPllClk(clkDev, cfg, &cfg->sysClkCfg.pll);
 
     } break;
@@ -102,7 +122,7 @@ static ohal_Error StClock_Enable(ohal_Clock *clkDev)
 
     cfg = (ohal_StClock_Cfg *)clkDev->cfg;
 
-    if (cfg->sysClkSrc == OHAL_ST_CLOCK_SRC_PLL) {
+    if (cfg->sysClkSrc == OHAL_ST_CLOCK_SYSCLK_SRC_PLL) {
         err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_CR_REG, STCLOCK_CR_PLLON_MASK,
                               ohal_SetBits(STCLOCK_CR_PLLON_MASK, 1));
         if (err) {
@@ -111,19 +131,36 @@ static ohal_Error StClock_Enable(ohal_Clock *clkDev)
     }
 
     for (int i = 0; i < cfg->periphClkEnCount; ++i) {
-        if (cfg->periphClkEn[i] == OHAL_ST_CLOCK_PERIPH_GPIOA) {
+        switch (cfg->periphClkEn[i]) {
+        case OHAL_ST_CLOCK_PERIPH_GPIOA:
             err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_AHB2ENR_REG, STCLOCK_AHB2ENR_GPIOAEN,
-                               ohal_SetBits(STCLOCK_AHB2ENR_GPIOAEN, 1));
+                                  ohal_SetBits(STCLOCK_AHB2ENR_GPIOAEN, 1));
             if (err) {
                 return err;
             }
-        }
-        if (cfg->periphClkEn[i] == OHAL_ST_CLOCK_PERIPH_GPIOB) {
+
+            break;
+
+        case OHAL_ST_CLOCK_PERIPH_GPIOB:
             err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_AHB2ENR_REG, STCLOCK_AHB2ENR_GPIOBEN,
-                               ohal_SetBits(STCLOCK_AHB2ENR_GPIOBEN, 1));
+                                  ohal_SetBits(STCLOCK_AHB2ENR_GPIOBEN, 1));
             if (err) {
                 return err;
             }
+
+            break;
+
+        case OHAL_ST_CLOCK_PERIPH_LPUART1:
+            err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_APB1ENR2_REG, STCLOCK_APB1ENR2_LPUART1EN,
+                                  ohal_SetBits(STCLOCK_APB1ENR2_LPUART1EN, 1));
+            if (err) {
+                return err;
+            }
+
+            break;
+
+        default:
+            return OHAL_EINVAL;
         }
     }
 
@@ -142,7 +179,7 @@ static ohal_Error StClock_Disable(ohal_Clock *clkDev)
 
     cfg = (ohal_StClock_Cfg *)clkDev->cfg;
 
-    if (cfg->sysClkSrc == OHAL_ST_CLOCK_SRC_PLL) {
+    if (cfg->sysClkSrc == OHAL_ST_CLOCK_SYSCLK_SRC_PLL) {
         err = ohal_Reg_Set(&clkDev->dev.reg, STCLOCK_CR_REG,
                            ohal_SetBits(STCLOCK_CR_PLLON_MASK, 0));
         if (err) {
@@ -165,6 +202,31 @@ static ohal_Error StClock_Disable(ohal_Clock *clkDev)
 
 static ohal_Error StClock_GetRate(ohal_Clock *clkDev, size_t *rateOut)
 {
+    
+    ohal_StClock_Cfg *cfg;
+
+    if (!clkDev || !clkDev->cfg) {
+        return OHAL_EINVAL;
+    }
+
+    cfg = (ohal_StClock_Cfg *)clkDev->cfg;
+    if (cfg->sysClkSrc == OHAL_ST_CLOCK_SYSCLK_SRC_PLL) {
+        ohal_StClock_PllClkCfg *pllClkCfg = &cfg->sysClkCfg.pll;
+        /* Sys freq = ((srcFreq / pllm) * plln) / pllr */ 
+        size_t srcFreq;
+        size_t pllm = pllClkCfg->m + 1;
+        size_t plln = pllClkCfg->n;
+        size_t pllr = pllClkCfg->r + 1;
+
+        if (pllClkCfg->clkSrc == OHAL_ST_CLOCK_PLLCLK_SRC_MSI) {
+            srcFreq = 4000000;
+        }
+        else {
+            return OHAL_EINVAL;
+        }
+
+        *rateOut = ((srcFreq / pllm) * plln) / pllr;
+    }
     return OHAL_SUCCESS;
 }
 

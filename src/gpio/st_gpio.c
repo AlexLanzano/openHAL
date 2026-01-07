@@ -36,8 +36,8 @@ static ohal_Error StGpio_InitMode(ohal_Reg *portReg, ohal_StGpio_Cfg *pinCfg)
     u8 maskBit = pin << 1;
     size_t mask = OHAL_MASK_RANGE(maskBit + 1, maskBit);
 
-    err = ohal_Reg_Set(portReg, STGPIO_GPIOx_MODE_REG,
-                       ohal_SetBits(mask, pinCfg->mode));
+    err = ohal_Reg_Update(portReg, STGPIO_GPIOx_MODE_REG, mask,
+                          ohal_SetBits(mask, pinCfg->mode));
 
     return err;
 }
@@ -48,8 +48,8 @@ static ohal_Error StGpio_InitOutType(ohal_Reg *portReg, ohal_StGpio_Cfg *pinCfg)
     u8 pin = pinCfg->pin;
     size_t mask = OHAL_MASK(pin);
 
-    err = ohal_Reg_Set(portReg, STGPIO_GPIOx_OUTTYPE_REG,
-                       ohal_SetBits(mask, pinCfg->outType));
+    err = ohal_Reg_Update(portReg, STGPIO_GPIOx_OUTTYPE_REG, mask,
+                          ohal_SetBits(mask, pinCfg->outType));
 
     return err;
 }
@@ -61,8 +61,8 @@ static ohal_Error StGpio_InitSpeed(ohal_Reg *portReg, ohal_StGpio_Cfg *pinCfg)
     u8 maskBit = pin << 1;
     size_t mask = OHAL_MASK_RANGE(maskBit + 1, maskBit);
 
-    err = ohal_Reg_Set(portReg, STGPIO_GPIOx_SPEED_REG,
-                       ohal_SetBits(mask, pinCfg->mode));
+    err = ohal_Reg_Update(portReg, STGPIO_GPIOx_SPEED_REG, mask,
+                          ohal_SetBits(mask, pinCfg->mode));
 
     return err;
 }
@@ -85,8 +85,8 @@ static ohal_Error StGpio_InitAltFn(ohal_Reg *portReg, ohal_StGpio_Cfg *pinCfg)
     maskBit = pin << 2;
     mask = OHAL_MASK_RANGE(maskBit + 3, maskBit);
 
-    err = ohal_Reg_Set(portReg, regOffset,
-                       ohal_SetBits(mask, pinCfg->mode));
+    err = ohal_Reg_Update(portReg, regOffset, mask,
+                          ohal_SetBits(mask, pinCfg->altFn));
 
     return err;
 }
@@ -122,9 +122,11 @@ static ohal_Error StGpio_InitPin(ohal_Gpio *gpioDev, ohal_StGpio_Cfg *pinCfg)
         return err;
     }
 
-    err = StGpio_InitAltFn(&portReg, pinCfg);
-    if (err) {
-        return err;
+    if (pinCfg->mode == OHAL_STGPIO_MODE_ALTFN) {
+        err = StGpio_InitAltFn(&portReg, pinCfg);
+        if (err) {
+            return err;
+        }
     }
 
     return OHAL_SUCCESS;
@@ -215,8 +217,8 @@ static ohal_Error StGpio_Set(ohal_Gpio *gpioDev, size_t pin, size_t value)
     }
 
     mask = OHAL_MASK(cfg[pin].pin);
-    err = ohal_Reg_Set(&portReg, STGPIO_GPIOx_ODR_REG,
-                       ohal_SetBits(mask, value));
+    err = ohal_Reg_Update(&portReg, STGPIO_GPIOx_ODR_REG, mask,
+                          ohal_SetBits(mask, value));
     if (err) {
         return err;
     }
