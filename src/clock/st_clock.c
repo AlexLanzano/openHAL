@@ -180,8 +180,9 @@ static ohal_Error StClock_Disable(ohal_Clock *clkDev)
     cfg = (ohal_StClock_Cfg *)clkDev->cfg;
 
     if (cfg->sysClkSrc == OHAL_ST_CLOCK_SYSCLK_SRC_PLL) {
-        err = ohal_Reg_Set(&clkDev->dev.reg, STCLOCK_CR_REG,
-                           ohal_SetBits(STCLOCK_CR_PLLON_MASK, 0));
+        err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_CR_REG,
+                              STCLOCK_CR_PLLON_MASK,
+                              ohal_SetBits(STCLOCK_CR_PLLON_MASK, 0));
         if (err) {
             return err;
         }
@@ -189,8 +190,9 @@ static ohal_Error StClock_Disable(ohal_Clock *clkDev)
 
     for (int i = 0; i < cfg->periphClkEnCount; ++i) {
         if (cfg->periphClkEn[i] == OHAL_ST_CLOCK_PERIPH_GPIOA) {
-            err = ohal_Reg_Set(&clkDev->dev.reg, STCLOCK_AHB2ENR_REG,
-                               ohal_SetBits(STCLOCK_AHB2ENR_GPIOAEN, 0));
+            err = ohal_Reg_Update(&clkDev->dev.reg, STCLOCK_AHB2ENR_REG,
+                                  STCLOCK_AHB2ENR_GPIOAEN,
+                                  ohal_SetBits(STCLOCK_AHB2ENR_GPIOAEN, 0));
             if (err) {
                 return err;
             }

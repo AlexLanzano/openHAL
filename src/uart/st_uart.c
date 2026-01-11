@@ -16,6 +16,7 @@
 #define STUART_ISR_REG 0x1C
 #define STUART_ISR_RXFNE_MASK OHAL_MASK(5)
 #define STUART_ISR_TC_MASK OHAL_MASK(6)
+#define STUART_ISR_TXE_MASK OHAL_MASK(7)
 
 #define STUART_RDR_REG 0x24
 #define STUART_RDR_RDR_MASK OHAL_MASK_RANGE(8, 0)
@@ -40,14 +41,15 @@ static ohal_Error StUart_Init(ohal_Uart *uartDev)
 
     brr = (clockFreq / cfg->baud) * 256;
     
-
-    err = ohal_Reg_Set(reg, STUART_BRR_REG,
+    err = ohal_Reg_Update(reg, STUART_BRR_REG,
+                          STUART_BRR_BRR_MASK,
                           ohal_SetBits(STUART_BRR_BRR_MASK, brr));
     if (err) {
         return err;
     }
 
-    err = ohal_Reg_Update(reg, STUART_CR1_REG, STUART_CR1_UE | STUART_CR1_RE | STUART_CR1_TE,
+    err = ohal_Reg_Update(reg, STUART_CR1_REG,
+                          STUART_CR1_UE | STUART_CR1_RE | STUART_CR1_TE,
                           ohal_SetBits(STUART_CR1_UE, 1) |
                           ohal_SetBits(STUART_CR1_RE, 1) |
                           ohal_SetBits(STUART_CR1_TE, 1));
@@ -63,16 +65,17 @@ static ohal_Error StUart_Deinit(ohal_Uart *uartDev)
 
     return OHAL_SUCCESS;
 }
-
+extern void WaitMs(size_t ms);
 static ohal_Error StUart_Send(ohal_Uart *uartDev, u8 *data, size_t dataSz)
 {
     ohal_Error err;
-    size_t txComplete = 0;
     ohal_Reg *reg = &uartDev->dev.reg;
     
     for (size_t i = 0; i < dataSz; ++i) {
-        err = ohal_Reg_Set(reg, STUART_TDR_REG, 
-                           ohal_SetBits(STUART_TDR_TDR_MASK, data[i]));
+        size_t txComplete = 0;
+
+        err = ohal_Reg_Update(reg, STUART_TDR_REG, STUART_TDR_TDR_MASK, 
+                              ohal_SetBits(STUART_TDR_TDR_MASK, data[i]));
         if (err) {
             return err;
         }
@@ -83,7 +86,6 @@ static ohal_Error StUart_Send(ohal_Uart *uartDev, u8 *data, size_t dataSz)
                 return err;
             }
         }
-
     }
 
     return OHAL_SUCCESS;
@@ -92,11 +94,12 @@ static ohal_Error StUart_Send(ohal_Uart *uartDev, u8 *data, size_t dataSz)
 static ohal_Error StUart_Recv(ohal_Uart *uartDev, u8 *data, size_t dataSz)
 {
     ohal_Error err;
-    size_t dataReceived = 0;
     ohal_Reg *reg = &uartDev->dev.reg;
     size_t d;
     
     for (size_t i = 0; i < dataSz; ++i) {
+        size_t dataReceived = 0;
+
         while (!dataReceived) {
             err = ohal_Reg_Get(reg, STUART_ISR_REG, STUART_ISR_RXFNE_MASK, &dataReceived);
             if (err) {

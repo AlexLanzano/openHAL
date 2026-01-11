@@ -9,7 +9,6 @@ typedef struct ohal_Reg {
     size_t size;
 } ohal_Reg;
 
-ohal_Error ohal_Reg_Set(ohal_Reg *regmap, size_t offset, size_t value);
 ohal_Error ohal_Reg_Update(ohal_Reg *regmap, size_t offset, size_t mask, size_t value);
 ohal_Error ohal_Reg_Get(ohal_Reg *regmap, size_t offset, size_t mask, size_t *value);
 

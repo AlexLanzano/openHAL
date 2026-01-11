@@ -3,22 +3,9 @@
 #include <openHAL/bitops.h>
 #include <stddef.h>
 
-ohal_Error ohal_Reg_Set(ohal_Reg *regmap, size_t offset, size_t value)
-{
-    size_t *reg;
-    if (!regmap || offset > regmap->size) {
-        return OHAL_EINVAL;
-    }
-
-    reg = (size_t *)(regmap->base + offset);
-    *reg = value;
-
-    return OHAL_SUCCESS;
-}
-
 ohal_Error ohal_Reg_Update(ohal_Reg *regmap, size_t offset, size_t mask, size_t value)
 {
-    size_t *reg;
+    volatile size_t *reg;
     if (!regmap || offset > regmap->size) {
         return OHAL_EINVAL;
     }
@@ -31,13 +18,13 @@ ohal_Error ohal_Reg_Update(ohal_Reg *regmap, size_t offset, size_t mask, size_t 
 
 ohal_Error ohal_Reg_Get(ohal_Reg *regmap, size_t offset, size_t mask, size_t *value)
 {
-    size_t *reg;
+    size_t val;
     if (!regmap || offset > regmap->size || !value) {
         return OHAL_EINVAL;
     }
 
-    reg = (size_t *)(regmap->base + offset);
-    *value = ohal_GetBits(mask, *reg);
+    val = *(volatile size_t *)(regmap->base + offset);
+    *value = ohal_GetBits(mask, val);
 
     return OHAL_SUCCESS;
 }

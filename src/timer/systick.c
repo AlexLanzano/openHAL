@@ -24,16 +24,18 @@ static ohal_Error SysTick_Init(ohal_Timer *timerDev)
 
     cfg = (ohal_SysTick_Cfg *)timerDev->cfg;
 
-    err = ohal_Reg_Set(reg, SYSTICK_CSR_REG, 
-                       ohal_SetBits(SYSTICK_CSR_CLKSOURCE, cfg->clkSrc) |
-                       ohal_SetBits(SYSTICK_CSR_TICKINT, cfg->tickInt));
+    err = ohal_Reg_Update(reg, SYSTICK_CSR_REG,
+                          SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT,
+                          ohal_SetBits(SYSTICK_CSR_CLKSOURCE, cfg->clkSrc) |
+                          ohal_SetBits(SYSTICK_CSR_TICKINT, cfg->tickInt));
 
     if (err) {
         return err;
     }
 
-    err = ohal_Reg_Set(reg, SYSTICK_RVR_REG, 
-                       ohal_SetBits(SYSTICK_RVR_RELOAD, cfg->cyclesPerTick));
+    err = ohal_Reg_Update(reg, SYSTICK_RVR_REG, 
+                          SYSTICK_RVR_RELOAD,
+                          ohal_SetBits(SYSTICK_RVR_RELOAD, cfg->cyclesPerTick));
 
     return err;
 }

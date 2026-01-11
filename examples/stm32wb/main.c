@@ -166,7 +166,7 @@ void main(void)
     };
     u32 acrMask = OHAL_MASK_RANGE(2, 0);
 
-    err = ohal_Reg_Set(&flash, 0, ohal_SetBits(acrMask, 3));
+    err = ohal_Reg_Update(&flash, 0, acrMask, ohal_SetBits(acrMask, 3));
     if (err) {
         ohal_PrintErr(err, "Failed to ohal_Reg_Set");
         goto loop;
@@ -209,14 +209,23 @@ void main(void)
     }
 
     while (1) {
-        ohal_Timer_Stop(&sysTickTimer);
-        err = ohal_Uart_Send(&lpuart1, (u8 *)"A", 1);
+        u8 input[8];
+        err = ohal_Uart_Send(&lpuart1, (u8 *)"Enter Stuff:\r\n", 14);
         if (err) {
             ohal_PrintErr(err, "Failed to ohal_Uart_Send");
             goto loop;
         }
-        ohal_Timer_Start(&sysTickTimer);
 
+        err = ohal_Uart_Recv(&lpuart1, input, sizeof(input));
+        if (err) {
+            goto loop;
+        }
+
+        err = ohal_Uart_Send(&lpuart1, input, sizeof(input));
+        if (err) {
+            ohal_PrintErr(err, "Failed to ohal_Uart_Send");
+            goto loop;
+        }
         err = ohal_Gpio_Set(&gpio, 0, 1);
         if (err) {
             ohal_PrintErr(err, "Failed to ohal_Gpio_Set");
