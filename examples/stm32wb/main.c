@@ -1,23 +1,23 @@
 #include <openHAL/openHAL.h>
-#include <openHAL/clock/st_clock.h>
+#include <openHAL/clock/st_rcc.h>
 #include <openHAL/gpio/st_gpio.h>
 #include <openHAL/timer/systick.h>
 #include <openHAL/uart/st_uart.h>
 #include <openHAL/bitops.h>
 
-ohal_StClock_PeriphClk periphClkEn[] =
+ohal_StRcc_PeriphClk periphClkEn[] =
 {
-    OHAL_ST_CLOCK_PERIPH_GPIOA,
-    OHAL_ST_CLOCK_PERIPH_GPIOB,
-    OHAL_ST_CLOCK_PERIPH_LPUART1,
+    OHAL_ST_RCC_PERIPH_GPIOA,
+    OHAL_ST_RCC_PERIPH_GPIOB,
+    OHAL_ST_RCC_PERIPH_LPUART1,
 };
 
-ohal_StClock_Cfg clkCfg =
+ohal_StRcc_Cfg clkCfg =
 {
-    .sysClkSrc = OHAL_ST_CLOCK_SYSCLK_SRC_PLL,
+    .sysClkSrc = OHAL_ST_RCC_SYSCLK_SRC_PLL,
     .sysClkCfg.pll =
     {
-        .clkSrc = OHAL_ST_CLOCK_PLLCLK_SRC_MSI,
+        .clkSrc = OHAL_ST_RCC_PLLCLK_SRC_MSI,
         /* 64 MHz */
         .n = 32,
         .m = 0,
@@ -29,7 +29,7 @@ ohal_StClock_Cfg clkCfg =
     .periphClkEnCount = sizeof(periphClkEn),
 };
 
-ohal_Clock clk = {
+ohal_Clock rcc = {
     .dev = {
         .name = "pllClk",
         .reg = {
@@ -37,7 +37,7 @@ ohal_Clock clk = {
             .size = 0x400,
         },
     },
-    .driver = &g_stClockDriver,
+    .driver = &g_stRccDriver,
     .cfg = &clkCfg,
 };
 
@@ -104,7 +104,7 @@ ohal_Timer sysTickTimer = {
 
 ohal_StUart_Cfg lpuart1Cfg = {
     .baud = 115200,
-    .sysClk = &clk,
+    .sysClk = &rcc,
 };
 
 ohal_Uart lpuart1 = {
@@ -167,13 +167,13 @@ void main(void)
         goto loop;
     }
 
-    err = ohal_Clock_Init(&clk); 
+    err = ohal_Clock_Init(&rcc); 
     if (err) {
         ohal_PrintErr(err, "Failed to ohal_Clock_Init");
         goto loop;
     }
 
-    err = ohal_Clock_Enable(&clk);
+    err = ohal_Clock_Enable(&rcc);
     if (err) {
         ohal_PrintErr(err, "Failed to ohal_Clock_Enable");
         goto loop;
