@@ -125,7 +125,7 @@ static ohal_Error StUart_Cmd(ohal_Uart *uartDev, size_t cmd, void *args)
     return OHAL_SUCCESS;
 }
 
-ohal_UartOps g_stUartOps = {
+ohal_UartDriver g_stUartDriver = {
     .Init = StUart_Init,
     .Deinit = StUart_Deinit,
     .Send = StUart_Send,

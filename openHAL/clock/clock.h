@@ -14,11 +14,11 @@ typedef struct {
     ohal_Error (*Disable)(ohal_Clock *clkDev);
     ohal_Error (*GetRate)(ohal_Clock *clkDev, size_t *rate);
     ohal_Error (*Cmd)(ohal_Clock *clkDev, size_t cmd, void *args);
-} ohal_ClockOps;
+} ohal_ClockDriver;
 
 struct ohal_Clock {
     ohal_Device dev;
-    ohal_ClockOps *ops;
+    ohal_ClockDriver *driver;
     void *cfg;
 };
 

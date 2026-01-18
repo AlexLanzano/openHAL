@@ -231,7 +231,7 @@ static ohal_Error StGpio_Cmd(ohal_Gpio *gpioDev, size_t cmd, void *args)
     return OHAL_SUCCESS;
 }
 
-ohal_GpioOps g_stGpioOps = {
+ohal_GpioDriver g_stGpioDriver = {
     .Init = StGpio_Init,
     .Deinit = StGpio_Deinit,
     .Get = StGpio_Get,

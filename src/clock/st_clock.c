@@ -237,7 +237,7 @@ static ohal_Error StClock_Cmd(ohal_Clock *clkDev, size_t cmd, void *args)
     return OHAL_SUCCESS;
 }
 
-ohal_ClockOps g_stClockOps = {
+ohal_ClockDriver g_stClockDriver = {
     .Init = StClock_Init,
     .Deinit = StClock_Deinit,
     .Enable = StClock_Enable,

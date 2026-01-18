@@ -13,11 +13,11 @@ typedef struct {
     ohal_Error (*Send)(ohal_Uart *uartDev, u8 *data, size_t dataSz);
     ohal_Error (*Recv)(ohal_Uart *uartDev, u8 *data, size_t dataSz);
     ohal_Error (*Cmd)(ohal_Uart *uartDev, size_t cmd, void *args);
-} ohal_UartOps;
+} ohal_UartDriver;
 
 struct ohal_Uart {
     ohal_Device dev;
-    ohal_UartOps *ops;
+    ohal_UartDriver *driver;
     void *cfg;
 };
 

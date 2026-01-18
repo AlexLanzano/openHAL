@@ -13,11 +13,11 @@ typedef struct {
     ohal_Error (*Start)(ohal_Timer *timerDev);
     ohal_Error (*Stop)(ohal_Timer *timerDev);
     ohal_Error (*Reset)(ohal_Timer *timerDev);
-} ohal_TimerOps;
+} ohal_TimerDriver;
 
 struct ohal_Timer{
     ohal_Device dev;
-    ohal_TimerOps *ops;
+    ohal_TimerDriver *driver;
     void *cfg;
 };
 

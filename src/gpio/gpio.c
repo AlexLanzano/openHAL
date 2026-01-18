@@ -4,52 +4,52 @@
 
 inline ohal_Error ohal_Gpio_Init(ohal_Gpio *gpioDev)
 {
-    if (!gpioDev || !gpioDev->ops || !gpioDev->ops->Init) {
+    if (!gpioDev || !gpioDev->driver || !gpioDev->driver->Init) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return gpioDev->ops->Init(gpioDev);
+    return gpioDev->driver->Init(gpioDev);
 }
 
 inline ohal_Error ohal_Gpio_Deinit(ohal_Gpio *gpioDev)
 {
-    if (!gpioDev || !gpioDev->ops || !gpioDev->ops->Deinit) {
+    if (!gpioDev || !gpioDev->driver || !gpioDev->driver->Deinit) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return gpioDev->ops->Deinit(gpioDev);
+    return gpioDev->driver->Deinit(gpioDev);
     
 }
 
 inline ohal_Error ohal_Gpio_Get(ohal_Gpio *gpioDev, size_t pin, size_t *value)
 {
-    if (!gpioDev || !gpioDev->ops || !gpioDev->ops->Init || !value) {
+    if (!gpioDev || !gpioDev->driver || !gpioDev->driver->Init || !value) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return gpioDev->ops->Get(gpioDev, pin, value);
+    return gpioDev->driver->Get(gpioDev, pin, value);
 
 }
 
 inline ohal_Error ohal_Gpio_Set(ohal_Gpio *gpioDev, size_t pin, size_t value)
 {
-    if (!gpioDev || !gpioDev->ops || !gpioDev->ops->Set) {
+    if (!gpioDev || !gpioDev->driver || !gpioDev->driver->Set) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return gpioDev->ops->Set(gpioDev, pin, value);
+    return gpioDev->driver->Set(gpioDev, pin, value);
 }
 
 inline ohal_Error ohal_Gpio_Cmd(ohal_Gpio *gpioDev, size_t cmd, void *args)
 {
-    if (!gpioDev || !gpioDev->ops || !gpioDev->ops->Cmd) {
+    if (!gpioDev || !gpioDev->driver || !gpioDev->driver->Cmd) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return gpioDev->ops->Cmd(gpioDev, cmd, args);
+    return gpioDev->driver->Cmd(gpioDev, cmd, args);
 }

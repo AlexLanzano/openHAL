@@ -5,10 +5,10 @@
 #include <openHAL/uart/st_uart.h>
 #include <openHAL/bitops.h>
 
-extern ohal_ClockOps g_stClockOps;
-extern ohal_GpioOps g_stGpioOps;
-extern ohal_TimerOps g_sysTickOps;
-extern ohal_UartOps g_stUartOps;
+extern ohal_ClockDriver g_stClockDriver;
+extern ohal_GpioDriver g_stGpioDriver;
+extern ohal_TimerDriver g_sysTickDriver;
+extern ohal_UartDriver g_stUartDriver;
 
 ohal_StClock_PeriphClk periphClkEn[] =
 {
@@ -42,7 +42,7 @@ ohal_Clock clk = {
             .size = 0x400,
         },
     },
-    .ops = &g_stClockOps,
+    .driver = &g_stClockDriver,
     .cfg = &clkCfg,
 };
 
@@ -84,7 +84,7 @@ ohal_Gpio gpio = {
             .size = 0x2000,
         },
     },
-    .ops = &g_stGpioOps,
+    .driver = &g_stGpioDriver,
     .pinCfg = &gpioCfg,
     .pinCount = sizeof(gpioCfg) / sizeof(ohal_StGpio_Cfg),
 };
@@ -103,7 +103,7 @@ ohal_Timer sysTickTimer = {
             .size = 0x400,
         },
     },
-    .ops = &g_sysTickOps,
+    .driver = &g_sysTickDriver,
     .cfg = &sysTickCfg,
 };
 
@@ -120,7 +120,7 @@ ohal_Uart lpuart1 = {
             .size = 0x400,
         },
     },
-    .ops = &g_stUartOps,
+    .driver = &g_stUartDriver,
     .cfg = &lpuart1Cfg,
 };
 

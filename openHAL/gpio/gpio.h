@@ -13,11 +13,11 @@ typedef struct {
     ohal_Error (*Get)(ohal_Gpio *gpioDev, size_t pin, size_t *value); 
     ohal_Error (*Set)(ohal_Gpio *gpioDev, size_t pin, size_t value); 
     ohal_Error (*Cmd)(ohal_Gpio *gpioDev, size_t cmd, void *args);
-} ohal_GpioOps;
+} ohal_GpioDriver;
 
 struct ohal_Gpio {
     ohal_Device dev;
-    ohal_GpioOps *ops;
+    ohal_GpioDriver *driver;
     void *pinCfg;
     size_t pinCount;
 };

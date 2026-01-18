@@ -81,7 +81,7 @@ static ohal_Error SysTick_Reset(ohal_Timer *timerDev)
     return OHAL_SUCCESS;
 }
 
-ohal_TimerOps g_sysTickOps = {
+ohal_TimerDriver g_sysTickDriver = {
     .Init = SysTick_Init,
     .Deinit = SysTick_Deinit,
     .Start = SysTick_Start,

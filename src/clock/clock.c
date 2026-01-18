@@ -4,61 +4,61 @@
 
 inline ohal_Error ohal_Clock_Init(ohal_Clock *clkDev)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->Init) {
+    if (!clkDev || !clkDev->driver || !clkDev->driver->Init) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->Init(clkDev);
+    return clkDev->driver->Init(clkDev);
 }
 
 inline ohal_Error ohal_Clock_Deinit(ohal_Clock *clkDev)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->Deinit) {
+    if (!clkDev || !clkDev->driver || !clkDev->driver->Deinit) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->Deinit(clkDev);
+    return clkDev->driver->Deinit(clkDev);
 }
 
 inline ohal_Error ohal_Clock_Enable(ohal_Clock *clkDev)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->Enable) {
+    if (!clkDev || !clkDev->driver || !clkDev->driver->Enable) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->Enable(clkDev);
+    return clkDev->driver->Enable(clkDev);
 }
 
 inline ohal_Error ohal_Clock_Disable(ohal_Clock *clkDev)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->Disable) {
+    if (!clkDev || !clkDev->driver || !clkDev->driver->Disable) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->Disable(clkDev);
+    return clkDev->driver->Disable(clkDev);
 }
 
 inline ohal_Error ohal_Clock_GetRate(ohal_Clock *clkDev, size_t *rateOut)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->GetRate ||
+    if (!clkDev || !clkDev->driver || !clkDev->driver->GetRate ||
         !rateOut) 
     {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
     }
 
-    return clkDev->ops->GetRate(clkDev, rateOut);
+    return clkDev->driver->GetRate(clkDev, rateOut);
 }
 
 inline ohal_Error ohal_Clock_Cmd(ohal_Clock *clkDev, size_t cmd, void *args)
 {
-    if (!clkDev || !clkDev->ops || !clkDev->ops->Cmd) {
+    if (!clkDev || !clkDev->driver || !clkDev->driver->Cmd) {
         ohal_PrintErr(OHAL_EINVAL, "Invalid argument");
         return OHAL_EINVAL;
     }
 
-    return clkDev->ops->Cmd(clkDev, cmd, args);
+    return clkDev->driver->Cmd(clkDev, cmd, args);
 }
