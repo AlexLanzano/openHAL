@@ -11,4 +11,6 @@ typedef struct ohal_StUart_Cfg {
     ohal_Clock *sysClk;
 } ohal_StUart_Cfg;
 
+extern ohal_UartDriver g_stUartDriver;
+
 #endif /* OHAL_ST_UART_H */

@@ -20,4 +20,6 @@ typedef struct {
     ohal_SysTick_TickInt tickInt;
 } ohal_SysTick_Cfg;
 
+extern ohal_TimerDriver g_sysTickDriver;
+
 #endif /* OHAL_SYSTICK_H */

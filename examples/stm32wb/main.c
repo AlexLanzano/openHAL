@@ -5,11 +5,6 @@
 #include <openHAL/uart/st_uart.h>
 #include <openHAL/bitops.h>
 
-extern ohal_ClockDriver g_stClockDriver;
-extern ohal_GpioDriver g_stGpioDriver;
-extern ohal_TimerDriver g_sysTickDriver;
-extern ohal_UartDriver g_stUartDriver;
-
 ohal_StClock_PeriphClk periphClkEn[] =
 {
     OHAL_ST_CLOCK_PERIPH_GPIOA,

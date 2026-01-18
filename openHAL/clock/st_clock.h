@@ -2,6 +2,7 @@
 #define OHAL_ST_CLOCK_H
 
 #include <openHAL/types.h>
+#include <openHAL/clock/clock.h>
 #include <stddef.h>
 
 typedef enum {
@@ -49,5 +50,6 @@ typedef struct ohal_StClock_Cfg {
     u8 periphClkEnCount;
 } ohal_StClock_Cfg;
 
+extern ohal_ClockDriver g_stClockDriver;
 
 #endif /* OHAL_ST_CLOCK_H */

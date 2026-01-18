@@ -2,6 +2,7 @@
 #define OHAL_STGPIO_H
 
 #include <openHAL/types.h>
+#include <openHAL/gpio/gpio.h>
 
 typedef enum {
     OHAL_STGPIO_PORT_A,
@@ -48,4 +49,7 @@ typedef struct {
     ohal_StGpio_Pull pull;
     u8 altFn;
 } ohal_StGpio_Cfg;
+
+extern ohal_GpioDriver g_stGpioDriver;
+
 #endif /* OHAL_STGPIO_H */
