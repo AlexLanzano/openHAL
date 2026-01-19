@@ -1,123 +1,6 @@
 #include <openHAL/openHAL.h>
-#include <openHAL/clock/st_rcc.h>
-#include <openHAL/gpio/st_gpio.h>
-#include <openHAL/timer/systick.h>
-#include <openHAL/uart/st_uart.h>
 #include <openHAL/bitops.h>
-
-ohal_StRcc_PeriphClk periphClkEn[] =
-{
-    OHAL_ST_RCC_PERIPH_GPIOA,
-    OHAL_ST_RCC_PERIPH_GPIOB,
-    OHAL_ST_RCC_PERIPH_LPUART1,
-};
-
-ohal_StRcc_Cfg clkCfg =
-{
-    .sysClkSrc = OHAL_ST_RCC_SYSCLK_SRC_PLL,
-    .sysClkCfg.pll =
-    {
-        .clkSrc = OHAL_ST_RCC_PLLCLK_SRC_MSI,
-        /* 64 MHz */
-        .n = 32,
-        .m = 0,
-        .r = 1,
-        .q = 0,
-        .p = 0,
-    },
-    .periphClkEn = periphClkEn,
-    .periphClkEnCount = sizeof(periphClkEn),
-};
-
-ohal_Clock rcc = {
-    .dev = {
-        .name = "pllClk",
-        .reg = {
-            .base = 0x58000000,
-            .size = 0x400,
-        },
-    },
-    .driver = &g_stRccDriver,
-    .cfg = &clkCfg,
-};
-
-ohal_StGpio_Cfg gpioCfg[] = {
-    { /* LED */
-        .port = OHAL_STGPIO_PORT_B,
-        .pin = 5,
-        .mode = OHAL_STGPIO_MODE_OUT,
-        .outType = OHAL_STGPIO_OUTTYPE_PUSHPULL,
-        .speed = OHAL_STGPIO_SPEED_LOW,
-        .pull = OHAL_STGPIO_PULL_UP,
-        .altFn = 0,
-    },
-    { /* LPUART1 TX */
-        .port = OHAL_STGPIO_PORT_A,
-        .pin = 2,
-        .mode = OHAL_STGPIO_MODE_ALTFN,
-        .outType = OHAL_STGPIO_OUTTYPE_PUSHPULL,
-        .speed = OHAL_STGPIO_SPEED_FAST,
-        .pull = OHAL_STGPIO_PULL_UP,
-        .altFn = 8,
-    },
-    { /* LPUART1 RX */
-        .port = OHAL_STGPIO_PORT_A,
-        .pin = 3,
-        .mode = OHAL_STGPIO_MODE_ALTFN,
-        .outType = OHAL_STGPIO_OUTTYPE_PUSHPULL,
-        .speed = OHAL_STGPIO_SPEED_FAST,
-        .pull = OHAL_STGPIO_PULL_UP,
-        .altFn = 8,
-    },
-};
-
-ohal_Gpio gpio = {
-    .dev = {
-        .name = "gpio",
-        .reg = {
-            .base = 0x48000000,
-            .size = 0x2000,
-        },
-    },
-    .driver = &g_stGpioDriver,
-    .pinCfg = &gpioCfg,
-    .pinCount = sizeof(gpioCfg) / sizeof(ohal_StGpio_Cfg),
-};
-
-ohal_SysTick_Cfg sysTickCfg = {
-    .cyclesPerTick = 64000000 / 1000,
-    .clkSrc = OHAL_SYSTICK_CLKSRC_SYSCLK,
-    .tickInt = OHAL_SYSTICK_TICKINT_ENABLED,
-};
-
-ohal_Timer sysTickTimer = {
-    .dev = {
-        .name = "SysTick Timer",
-        .reg = {
-            .base = 0xE000E010,
-            .size = 0x400,
-        },
-    },
-    .driver = &g_sysTickDriver,
-    .cfg = &sysTickCfg,
-};
-
-ohal_StUart_Cfg lpuart1Cfg = {
-    .baud = 115200,
-    .sysClk = &rcc,
-};
-
-ohal_Uart lpuart1 = {
-    .dev = {
-        .name = "LPUART1",
-        .reg = {
-            .base = 0x40008000,
-            .size = 0x400,
-        },
-    },
-    .driver = &g_stUartDriver,
-    .cfg = &lpuart1Cfg,
-};
+#include "stm32wb55xx_nucleo.h"
 
 volatile size_t g_tick = 0;
 volatile uint8_t g_waiting = 0;
@@ -154,16 +37,12 @@ void WaitMs(size_t ms)
 void main(void)
 {
     ohal_Error err;
-    ohal_Reg flash =
-    {
-        .base = 0x58004000,
-        .size = 0x400
+    ohal_StFlash_SetLatencyArgs args = {
+        .latency = OHAL_ST_FLASH_LATENCY_3
     };
-    u32 acrMask = OHAL_MASK_RANGE(2, 0);
 
-    err = ohal_Reg_Update(&flash, 0, acrMask, ohal_SetBits(acrMask, 3));
+    err = ohal_Flash_Cmd(&flash, OHAL_ST_FLASH_CMD_SET_LATENCY, &args);
     if (err) {
-        ohal_PrintErr(err, "Failed to ohal_Reg_Set");
         goto loop;
     }
 
@@ -221,7 +100,7 @@ void main(void)
             ohal_PrintErr(err, "Failed to ohal_Uart_Send");
             goto loop;
         }
-        err = ohal_Gpio_Set(&gpio, 0, 1);
+        err = ohal_Gpio_Set(&gpio, LED_PIN, 1);
         if (err) {
             ohal_PrintErr(err, "Failed to ohal_Gpio_Set");
             goto loop;
@@ -229,7 +108,7 @@ void main(void)
 
         WaitMs(1000);
 
-        err = ohal_Gpio_Set(&gpio, 0, 0);
+        err = ohal_Gpio_Set(&gpio, LED_PIN, 0);
         if (err) {
             ohal_PrintErr(err, "Failed to ohal_Gpio_Set");
             goto loop;
