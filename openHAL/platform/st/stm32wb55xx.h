@@ -7,6 +7,12 @@
 #include <openHAL/uart/st_uart.h>
 #include <openHAL/flash/st_flash.h>
 
+/**
+ * @file stm32wb55xx.h
+ * @brief Convenience initializers for STM32WB55xx device instances.
+ */
+
+/** Designated initializer for the STM32WB55xx LPUART1 device. */
 #define OHAL_STM32WB55XX_LPUART1_DEVICE \
     .dev = {                            \
         .name = "lpuart1",              \
@@ -47,6 +53,7 @@
     },                              \
     .driver = &g_stFlashDriver
 
+/** Designated initializer for the Cortex-M SysTick device. */
 #define OHAL_CORTEX_M_SYSTICK_DEVICE \
     .dev = {                        \
         .name = "systick",          \

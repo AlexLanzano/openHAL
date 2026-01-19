@@ -5,17 +5,34 @@
 #include <openHAL/error.h>
 #include <stddef.h>
 
+/**
+ * @file clock.h
+ * @brief Generic clock abstraction for configuring and controlling clock sources.
+ */
+
 typedef struct ohal_Clock ohal_Clock;
 
+/**
+ * @brief Driver vtable for clock devices.
+ */
 typedef struct {
+    /** Initialize the clock hardware. */
     ohal_Error (*Init)(ohal_Clock *clkDev);
+    /** Deinitialize the clock hardware. */
     ohal_Error (*Deinit)(ohal_Clock *clkDev);
+    /** Enable the clock output. */
     ohal_Error (*Enable)(ohal_Clock *clkDev);
+    /** Disable the clock output. */
     ohal_Error (*Disable)(ohal_Clock *clkDev);
+    /** Read back the effective clock rate. */
     ohal_Error (*GetRate)(ohal_Clock *clkDev, size_t *rate);
+    /** Issue driver-specific commands. */
     ohal_Error (*Cmd)(ohal_Clock *clkDev, size_t cmd, void *args);
 } ohal_ClockDriver;
 
+/**
+ * @brief Clock device instance tying a register map, driver, and configuration.
+ */
 struct ohal_Clock {
     ohal_Device dev;
     ohal_ClockDriver *driver;
@@ -62,9 +79,9 @@ ohal_Error ohal_Clock_Disable(ohal_Clock *clkDev);
  * @brief Reports the current output rate for a clock device.
  *
  * @param clkDev  Pointer to the clock instance being queried.
- * @param rate Storage for the computed frequency in Hz.
+ * @param rate    Storage for the computed frequency in Hz.
  *
- * @retval OHAL_SUCCESS Result stored in rateOut.
+ * @retval OHAL_SUCCESS Result stored in @p rate.
  * @retval OHAL_EINVAL  Null pointer or driver could not provide a rate.
  */
 ohal_Error ohal_Clock_GetRate(ohal_Clock *clkDev, size_t *rate);

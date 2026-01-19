@@ -5,16 +5,32 @@
 #include <openHAL/error.h>
 #include <stddef.h>
 
+/**
+ * @file uart.h
+ * @brief Generic UART abstraction and driver interface.
+ */
+
 typedef struct ohal_Uart ohal_Uart;
 
+/**
+ * @brief Driver vtable for UART devices.
+ */
 typedef struct {
+    /** Initialize the UART hardware. */
     ohal_Error (*Init)(ohal_Uart *uartDev);
+    /** Deinitialize the UART hardware. */
     ohal_Error (*Deinit)(ohal_Uart *uartDev);
+    /** Transmit a buffer. */
     ohal_Error (*Send)(ohal_Uart *uartDev, u8 *data, size_t dataSz);
+    /** Receive into a buffer. */
     ohal_Error (*Recv)(ohal_Uart *uartDev, u8 *data, size_t dataSz);
+    /** Issue driver-specific commands. */
     ohal_Error (*Cmd)(ohal_Uart *uartDev, size_t cmd, void *args);
 } ohal_UartDriver;
 
+/**
+ * @brief UART device instance tying a register map and driver.
+ */
 struct ohal_Uart {
     ohal_Device dev;
     ohal_UartDriver *driver;
